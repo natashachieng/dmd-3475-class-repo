@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shopping List</title>
+    </head>
+    <body>
+        <h1>Shopping List</h1>
+
+        <input type="text" id="newItem" placeholder="Enter an item...">
+        <button id="addItem">Add item</button>
+        <button id="deleteAll">Delete All</button>
+
+        <p id="itemCount">Total items: 3</p>
+
+        <ul id="itemList"></ul>
+
+        <script>
+            //array
+            var itemList = ["Apples", "Bread", "Milk"];
+
+            var addButton = document.querySelector("#addItem");
+            var deleteAllButton = document.querySelector("#deleteAll");
+            var itemInput = document.querySelector("#newItem");
+
+            //render function
+            function renderList() {
+                var listElement = document.querySelector("#itemList");
+                listElement.innerHTML = "";
+
+                for (var i = 0; i < itemList.length; i++) {
+                    var listItem = "<li>" + itemList[i] + "</li>";
+                    listElement.innerHTML += listItem;
+                }
+
+                //total item count
+                document.querySelector("#itemCount").innerHTML = "Total items: " + itemList.length;
+            }
+
+            //add function
+            addButton.addEventListener("click", function() {
+                var itemText = itemInput.value;
+
+                if (itemText === "") {
+                    alert("Please enter an item!");
+                    return;
+                }
+
+                itemList.push(itemText);
+                renderList();
+                itemInput.value = "";
+                itemInput.focus();
+            });
+
+            //delete all function
+            deleteAllButton.addEventListener("click", function() {
+                itemList.splice(0, itemList.length);
+                renderList();
+            });
+
+            renderList();
+        </script>
+    </body>
+</html>
