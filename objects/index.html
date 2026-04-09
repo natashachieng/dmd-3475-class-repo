@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        Learning about Objects
+    </title>
+</head>
+
+<body>
+    <h1>Learning about Objects</h1>
+
+    <div id="directory">
+        <!-- For every object in the directory variable, print it out here. -->
+    </div>
+
+    <!-- Add Person Form -->
+    <h2>Add New Person</h2>
+    <input type="text" id="new-name" placeholder="Name" />
+    <input type="text" id="new-role" placeholder="Role" />
+    <button onclick="addPerson()">Add</button>
+
+    <script>
+        var age = 37;
+        var name = "Joel";
+        var list = [];
+        var isOld = true;
+
+        var joel = {
+            name: "Joel",
+            age: 37,
+            list: ['Teach Class', 'Eat Lunch'],
+            isOld: true
+        };
+
+        console.log(joel);
+
+        var directory = [
+            {
+                name: "Joel",
+                role: "Faculty"
+            },
+            {
+                name: "Sarah",
+                role: "Student"
+            },
+            {
+                name: "Alyssa",
+                role: "Student"
+            }
+        ];
+
+        var editingIndex = null;
+
+        function renderDirectory() {
+            var container = document.getElementById('directory');
+            container.innerHTML = '';
+
+            directory.forEach(function (person, index) {
+                if (editingIndex === index) {
+                    // Show edit inputs for this row
+                    var nameInput = document.createElement('input');
+                    nameInput.id = 'edit-name';
+                    nameInput.value = person.name;
+
+                    var roleInput = document.createElement('input');
+                    roleInput.id = 'edit-role';
+                    roleInput.value = person.role;
+
+                    var saveBtn = document.createElement('button');
+                    saveBtn.textContent = 'Save';
+                    saveBtn.onclick = function () { saveEdit(index); };
+
+                    var cancelBtn = document.createElement('button');
+                    cancelBtn.textContent = 'Cancel';
+                    cancelBtn.onclick = cancelEdit;
+
+                    container.appendChild(nameInput);
+                    container.appendChild(roleInput);
+                    container.appendChild(saveBtn);
+                    container.appendChild(cancelBtn);
+                    container.appendChild(document.createElement('br'));
+                } else {
+                    // Show normal row with Edit button
+                    var p = document.createElement('p');
+                    p.textContent = person.name + ' - ' + person.role + ' ';
+
+                    var editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.onclick = function () { startEdit(index); };
+
+                    p.appendChild(editBtn);
+                    container.appendChild(p);
+                }
+            });
+        }
+
+        function startEdit(index) {
+            editingIndex = index;
+            renderDirectory();
+        }
+
+        function saveEdit(index) {
+            var name = document.getElementById('edit-name').value.trim();
+            var role = document.getElementById('edit-role').value.trim();
+            if (name && role) {
+                directory[index] = { name: name, role: role };
+                editingIndex = null;
+                renderDirectory();
+            }
+        }
+
+        function cancelEdit() {
+            editingIndex = null;
+            renderDirectory();
+        }
+
+        function addPerson() {
+            var name = document.getElementById('new-name').value.trim();
+            var role = document.getElementById('new-role').value.trim();
+            if (name && role) {
+                directory.push({ name: name, role: role });
+                document.getElementById('new-name').value = '';
+                document.getElementById('new-role').value = '';
+                renderDirectory();
+            }
+        }
+
+        renderDirectory();
+    </script>
+</body>
+
+</html>
