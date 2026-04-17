@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Breed Profile
+        </title>
+    </head>
+
+<body>
+
+    <a href="index.html">Back to Breeds</a>
+
+    <div id="breedInfo">
+
+    </div>
+
+    <script>
+
+        var params = new URLSearchParams(window.location.search);
+        var breedId = params.get("id");
+
+        function renderBreed(breed) {
+            const div = document.getElementById("breedInfo");
+
+            const h1 = document.createElement("h1");
+            h1.textContent = breed.attributes.name;
+
+            const desc = document.createElement("p");
+            desc.textContent = breed.attributes.description;
+
+            const femaleWeight = document.createElement("p");
+            femaleWeight.textContent = "Female weight max: " + breed.attributes.female_weight.max + " kg";
+
+            const maleWeight = document.createElement("p");
+            maleWeight.textContent = "Male weight max: " + breed.attributes.male_weight.max + " kg";
+
+            const lifespan = document.createElement("p");
+            lifespan.textContent = "Lifespan: " + breed.attributes.life.min + " - " + breed.attributes.life.max + " years";
+
+            div.appendChild(h1);
+            div.appendChild(desc);
+            div.appendChild(femaleWeight);
+            div.appendChild(maleWeight);
+            div.appendChild(lifespan);
+        }
+
+        function getDogBreeds() {
+            fetch('https://dogapi.dog/api/v2/breeds')
+            .then(response => response.json())
+            .then(function(data) {
+                var DogBreeds = data.data;
+
+                DogBreeds.forEach(function(breed) {
+                    if (breed.id == breedId) {
+                        renderBreed(breed);
+                    }
+                });
+            });
+        }
+
+        getDogBreeds();
+
+    </script>
+
+</body>
+</html>

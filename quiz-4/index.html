@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Dog Breed Browser
+        </title>
+    </head>
+
+<body>
+    <h1>
+        Dog Breeds
+    </h1>
+
+    <ul id="breedList">
+
+    </ul>
+
+    <script>
+
+        var breeds = [];
+
+        function renderList() {
+            const ulElement = document.getElementById("breedList");
+
+            breeds.forEach(function(breed) {
+                const li = document.createElement("li");
+                const a = document.createElement("a");
+
+                a.textContent = breed.attributes.name;
+                a.href = "profile.html?id=" + breed.id;
+
+                li.appendChild(a);
+                ulElement.appendChild(li);
+            });
+        }
+
+        function getDogBreeds() {
+            fetch('https://dogapi.dog/api/v2/breeds')
+            .then(response => response.json())
+            .then(function(data) {
+                breeds = data.data;
+                renderList();
+            });
+        }
+
+        getDogBreeds();
+
+    </script>
+
+</body>
+</html>
