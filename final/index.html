@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Tracker</title>
+</head>
+<body>
+
+  <h1>Task Tracker</h1>
+  <p>Add your tasks below. You can edit, delete, or check them off when done.</p>
+
+  <hr>
+
+  <h2>Add a Task</h2>
+
+  <label>Title:</label><br>
+  <input type="text" id="input-title" placeholder="e.g. Do homework" /><br><br>
+
+  <label>Category:</label><br>
+  <input type="text" id="input-category" placeholder="e.g. School, Home, Errands" /><br><br>
+
+  <label>Priority:</label><br>
+  <select id="input-priority">
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+    <option value="low">Low</option>
+  </select><br><br>
+
+  <label>Due Date:</label><br>
+  <input type="date" id="input-due" /><br><br>
+
+  <button onclick="addTask()">Add Task</button>
+  <p><small>You can also press Enter to add a task.</small></p>
+
+  <hr>
+
+  <button onclick="clearCompleted()">Remove Completed Tasks</button>
+  <p id="status-bar"></p>
+  <div id="task-list"></div>
+
+  <hr>
+
+  <!-- edit form, hidden by default -->
+  <div id="edit-section" style="display:none;">
+    <h2>Edit Task</h2>
+    <label>Title:</label><br>
+    <input type="text" id="edit-title" /><br><br>
+    <label>Category:</label><br>
+    <input type="text" id="edit-category" /><br><br>
+    <label>Priority:</label><br>
+    <select id="edit-priority">
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+      <option value="low">Low</option>
+    </select><br><br>
+    <label>Due Date:</label><br>
+    <input type="date" id="edit-due" /><br><br>
+    <button onclick="saveEdit()">Save</button>
+    <button onclick="cancelEdit()">Cancel</button>
+    <hr>
+  </div>
+
+  <h2>Import from API</h2>
+  <p>Load sample tasks from JSONPlaceholder and add them to your list.</p>
+  <button onclick="fetchTasks()">Fetch Sample Tasks</button>
+  <ul id="fetched-list"></ul>
+
+  
+  
+  
+  
+  
+  
+  
+  <script>
+
+    // my task data - array of objects
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [
+      { id: 1, title: "Do homework", 
+        category: "School",
+        priority: "high",
+        completed: false,
+        dueDate: "2026-04-28",
+        createdAt: new Date("2026-04-25").toISOString()
+      },
+      { id: 2, title: "Do laundry",
+        category: "Home",
+        priority: "medium",
+        completed: false,
+        dueDate: "2026-04-27",
+        createdAt: new Date("2026-04-26").toISOString()
+      },
+      { id: 3, title: "Pick up groceries",
+        category: "Errands",
+        priority: "medium",
+        completed: false,
+        dueDate: "2026-04-27",
+        createdAt: new Date("2026-04-26").toISOString()
+      }
+    ];
+
+    let nextId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+    let editingId = null;
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      const list = document.getElementById("task-list");
+      list.innerHTML = "";
+
+      const done = tasks.filter(t => t.completed).length;
+      document.getElementById("status-bar").textContent = tasks.length + " tasks — " + done + " completed";
+
+      if (tasks.length === 0) {
+        list.innerHTML = "<p>No tasks yet!</p>";
+        return;
+      }
+
+      for (let i = 0; i < tasks.length; i++) {
+        const t = tasks[i];
+        const due   = t.dueDate ? "Due: " + t.dueDate : "No due date";
+        const added = "Added: " + new Date(t.createdAt).toLocaleDateString();
+
+        const div = document.createElement("div");
+        div.innerHTML =
+          "<input type='checkbox' " + (t.completed ? "checked" : "") + " onchange='toggleDone(" + t.id + ")' />" +
+          " <strong>" + (t.completed ? "<s>" : "") + t.title + (t.completed ? "</s>" : "") + "</strong>" +
+          " [" + t.priority + "] | " + t.category +
+          "<br><small>" + due + " | " + added + "</small><br>" +
+          "<button onclick='openEdit(" + t.id + ")'>Edit</button> " +
+          "<button onclick='deleteTask(" + t.id + ")'>Delete</button><br><br>";
+
+        list.appendChild(div);
+      }
+    }
+
+    function addTask() {
+      const title = document.getElementById("input-title").value.trim();
+      if (!title) { alert("Please enter a title!"); return; }
+
+      tasks.push({
+        id: nextId++,
+        title: title,
+        category: document.getElementById("input-category").value.trim(),
+        priority: document.getElementById("input-priority").value,
+        completed: false,
+        dueDate: document.getElementById("input-due").value,
+        createdAt: new Date().toISOString()
+      });
+
+      saveTasks();
+      renderTasks();
+
+      // clear the form
+      document.getElementById("input-title").value = "";
+      document.getElementById("input-category").value = "";
+      document.getElementById("input-priority").value = "medium";
+      document.getElementById("input-due").value = "";
+      document.getElementById("input-title").focus();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveTasks();
+      renderTasks();
+    }
+
+    function toggleDone(id) {
+      const task = tasks.find(t => t.id === id);
+      task.completed = !task.completed;
+      saveTasks();
+      renderTasks();
+    }
+
+    function clearCompleted() {
+      tasks = tasks.filter(t => !t.completed);
+      saveTasks();
+      renderTasks();
+    }
+
+    function openEdit(id) {
+      editingId = id;
+      const task = tasks.find(t => t.id === id);
+      document.getElementById("edit-title").value    = task.title;
+      document.getElementById("edit-category").value = task.category;
+      document.getElementById("edit-priority").value = task.priority;
+      document.getElementById("edit-due").value      = task.dueDate || "";
+      document.getElementById("edit-section").style.display = "block";
+      window.scrollTo(0, 0);
+    }
+
+    function saveEdit() {
+      const task = tasks.find(t => t.id === editingId);
+      task.title    = document.getElementById("edit-title").value.trim();
+      task.category = document.getElementById("edit-category").value.trim();
+      task.priority = document.getElementById("edit-priority").value;
+      task.dueDate  = document.getElementById("edit-due").value;
+      document.getElementById("edit-section").style.display = "none";
+      saveTasks();
+      renderTasks();
+    }
+
+    function cancelEdit() {
+      document.getElementById("edit-section").style.display = "none";
+    }
+
+    function fetchTasks() {
+      document.getElementById("btn-fetch-label").textContent = "Loading...";
+
+      fetch("https://jsonplaceholder.typicode.com/todos?_limit=10")
+        .then(res => res.json())
+        .then(data => {
+          const ul = document.getElementById("fetched-list");
+          ul.innerHTML = "";
+
+          for (let i = 0; i < data.length; i++) {
+            const item = data[i];
+            const li = document.createElement("li");
+            li.innerHTML = (item.completed ? "[done] " : "[not done] ") + item.title +
+              " — <button onclick='importTask(" + item.id + ")'>Add</button>";
+            li.dataset.id    = item.id;
+            li.dataset.title = item.title;
+            li.dataset.done  = item.completed;
+            ul.appendChild(li);
+          }
+
+          document.getElementById("btn-fetch-label").textContent = "Fetch Sample Tasks";
+        })
+        .catch(() => alert("Could not load tasks from API."));
+    }
+
+    function importTask(id) {
+      const li = document.querySelector("#fetched-list li[data-id='" + id + "']");
+      tasks.push({
+        id: nextId++,
+        title: li.dataset.title,
+        category: "Imported",
+        priority: "medium",
+        completed: li.dataset.done === "true",
+        dueDate: "",
+        createdAt: new Date().toISOString()
+      });
+      saveTasks();
+      renderTasks();
+    }
+
+    // keyboard event — press Enter to add a task
+    document.getElementById("input-title").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") addTask();
+    });
+
+    // load tasks on page open
+    renderTasks();
+
+  </script>
+
+</body>
+</html>
