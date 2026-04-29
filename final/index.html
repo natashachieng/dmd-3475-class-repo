@@ -3,100 +3,390 @@
 <head>
   <meta charset="UTF-8" />
   <title>Task Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f0ede8;
+      --surface:  #ffffff;
+      --border:   #d8d3cb;
+      --text:     #1a1a1a;
+      --muted:    #888078;
+      --accent:   #2d6a4f;
+      --accent2:  #e76f51;
+      --high:     #e63946;
+      --med:      #e9c46a;
+      --low:      #52b788;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* header */
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+
+    /* cards / sections */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* form inputs */
+    label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text);
+      margin-bottom: 14px;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* buttons */
+    button {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 9px 18px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    button:hover { opacity: 0.85; }
+    button:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: #fcc;
+      color: var(--high);
+      font-size: 0.78rem;
+      padding: 5px 10px;
+    }
+
+    .btn-edit-sm {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text);
+      font-size: 0.78rem;
+      padding: 5px 10px;
+    }
+
+    /* controls bar */
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .controls select,
+    .controls input {
+      margin-bottom: 0;
+      width: auto;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .controls label {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    /* status bar */
+    #status-bar {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 12px;
+    }
+
+    /* task cards */
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task-item:last-child { border-bottom: none; }
+
+    .task-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      margin-top: 3px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-body { flex: 1; min-width: 0; }
+
+    .task-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .task-title.done {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .task-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .badge.high   { background: #fde8e8; color: var(--high); }
+    .badge.medium { background: #fdf3d0; color: #a07820; }
+    .badge.low    { background: #d8f3e3; color: #1f7a4a; }
+
+    .task-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* edit section */
+    #edit-section {
+      background: #fffbf5;
+      border: 1px solid #e8dfc8;
+    }
+
+    /* fetched list */
+    #fetched-list {
+      list-style: none;
+      margin-top: 12px;
+    }
+
+    #fetched-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      gap: 10px;
+    }
+
+    #fetched-list li:last-child { border-bottom: none; }
+
+    #fetched-list li span {
+      flex: 1;
+      color: var(--text);
+    }
+
+    .btn-import {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 6px 14px;
+    }
+  </style>
 </head>
 <body>
+<div class="container">
 
-  <h1>Task Tracker</h1>
-  <p>Add your tasks below. You can edit, delete, or check them off when done.</p>
+  <header>
+    <h1>Task Tracker</h1>
+    <p>Add your tasks below. You can edit, delete, or check them off when done.</p>
+  </header>
 
-  <hr>
+  <!-- Add Task -->
+  <div class="card">
+    <h2>Add a Task</h2>
 
-  <h2>Add a Task</h2>
+    <label>Title</label>
+    <input type="text" id="input-title" placeholder="e.g. Do homework" />
 
-  <label>Title:</label><br>
-  <input type="text" id="input-title" placeholder="e.g. Do homework" /><br><br>
+    <div class="form-row">
+      <div>
+        <label>Category</label>
+        <input type="text" id="input-category" placeholder="e.g. School, Home" />
+      </div>
+      <div>
+        <label>Due Date</label>
+        <input type="date" id="input-due" />
+      </div>
+    </div>
 
-  <label>Category:</label><br>
-  <input type="text" id="input-category" placeholder="e.g. School, Home, Errands" /><br><br>
+    <label>Priority</label>
+    <select id="input-priority">
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+      <option value="low">Low</option>
+    </select>
 
-  <label>Priority:</label><br>
-  <select id="input-priority">
-    <option value="medium">Medium</option>
-    <option value="high">High</option>
-    <option value="low">Low</option>
-  </select><br><br>
+    <button class="btn-primary" onclick="addTask()">Add Task</button>
+  </div>
 
-  <label>Due Date:</label><br>
-  <input type="date" id="input-due" /><br><br>
-
-  <button onclick="addTask()">Add Task</button>
-  <p><small>You can also press Enter to add a task.</small></p>
-
-  <hr>
-
-  <button onclick="clearCompleted()">Remove Completed Tasks</button>
-  <p id="status-bar"></p>
-  <div id="task-list"></div>
-
-  <hr>
-
-  <!-- edit form, hidden by default -->
-  <div id="edit-section" style="display:none;">
+  <!-- Edit Task (hidden) -->
+  <div class="card" id="edit-section" style="display:none;">
     <h2>Edit Task</h2>
-    <label>Title:</label><br>
-    <input type="text" id="edit-title" /><br><br>
-    <label>Category:</label><br>
-    <input type="text" id="edit-category" /><br><br>
-    <label>Priority:</label><br>
+
+    <label>Title</label>
+    <input type="text" id="edit-title" />
+
+    <div class="form-row">
+      <div>
+        <label>Category</label>
+        <input type="text" id="edit-category" />
+      </div>
+      <div>
+        <label>Due Date</label>
+        <input type="date" id="edit-due" />
+      </div>
+    </div>
+
+    <label>Priority</label>
     <select id="edit-priority">
       <option value="medium">Medium</option>
       <option value="high">High</option>
       <option value="low">Low</option>
-    </select><br><br>
-    <label>Due Date:</label><br>
-    <input type="date" id="edit-due" /><br><br>
-    <button onclick="saveEdit()">Save</button>
-    <button onclick="cancelEdit()">Cancel</button>
-    <hr>
+    </select>
+
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <button class="btn-primary" style="flex:1" onclick="saveEdit()">Save Changes</button>
+      <button class="btn-ghost" onclick="cancelEdit()">Cancel</button>
+    </div>
   </div>
 
-  <h2>Import from API</h2>
-  <p>Load sample tasks from JSONPlaceholder and add them to your list.</p>
-  <button onclick="fetchTasks()">Fetch Sample Tasks</button>
-  <ul id="fetched-list"></ul>
+  <!-- Task List -->
+  <div class="card">
+    <h2>My Tasks</h2>
 
-  
-  
-  
-  
-  
-  
-  
+    <div class="controls">
+      <label>Sort</label>
+      <select id="sort-select" onchange="renderTasks()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="alpha">A to Z</option>
+        <option value="priority">Priority</option>
+      </select>
+      <input type="text" id="filter-input" placeholder="Search tasks..." oninput="renderTasks()" />
+    </div>
+
+    <p id="status-bar"></p>
+    <div id="task-list"></div>
+
+    <button class="btn-clear" onclick="clearCompleted()" style="margin-top:12px;">Remove Completed</button>
+  </div>
+
+  <!-- Import from API -->
+  <div class="card">
+    <h2>Import from API</h2>
+    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:12px;">Load sample tasks from JSONPlaceholder and add them to your list.</p>
+    <button class="btn-ghost" id="btn-fetch-label" onclick="fetchTasks()">Fetch Sample Tasks</button>
+    <ul id="fetched-list"></ul>
+  </div>
+
+</div>
+
   <script>
 
     // my task data - array of objects
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [
-      { id: 1, title: "Do homework", 
-        category: "School",
-        priority: "high",
-        completed: false,
-        dueDate: "2026-04-28",
-        createdAt: new Date("2026-04-25").toISOString()
-      },
-      { id: 2, title: "Do laundry",
-        category: "Home",
-        priority: "medium",
-        completed: false,
-        dueDate: "2026-04-27",
-        createdAt: new Date("2026-04-26").toISOString()
-      },
-      { id: 3, title: "Pick up groceries",
-        category: "Errands",
-        priority: "medium",
-        completed: false,
-        dueDate: "2026-04-27",
-        createdAt: new Date("2026-04-26").toISOString()
-      }
+      { id: 1, title: "Do homework",      category: "School",  priority: "high",   completed: false, dueDate: "2026-04-28", createdAt: new Date("2026-04-25").toISOString() },
+      { id: 2, title: "Do laundry",        category: "Home",    priority: "medium", completed: false, dueDate: "2026-04-27", createdAt: new Date("2026-04-26").toISOString() },
+      { id: 3, title: "Pick up groceries", category: "Errands", priority: "medium", completed: false, dueDate: "2026-04-27", createdAt: new Date("2026-04-26").toISOString() }
     ];
 
     let nextId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
@@ -114,23 +404,46 @@
       document.getElementById("status-bar").textContent = tasks.length + " tasks — " + done + " completed";
 
       if (tasks.length === 0) {
-        list.innerHTML = "<p>No tasks yet!</p>";
+        list.innerHTML = "<p style='color:var(--muted);font-size:0.9rem;'>No tasks yet!</p>";
         return;
       }
 
-      for (let i = 0; i < tasks.length; i++) {
-        const t = tasks[i];
+      // filter by search input
+      const search = document.getElementById("filter-input").value.toLowerCase();
+      let filtered = tasks.filter(t => t.title.toLowerCase().includes(search));
+
+      // sort
+      const sort = document.getElementById("sort-select").value;
+      const PRIO = { high: 0, medium: 1, low: 2 };
+      filtered.sort(function(a, b) {
+        if (sort === "oldest")   return new Date(a.createdAt) - new Date(b.createdAt);
+        if (sort === "alpha")    return a.title.localeCompare(b.title);
+        if (sort === "priority") return PRIO[a.priority] - PRIO[b.priority];
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+      for (let i = 0; i < filtered.length; i++) {
+        const t = filtered[i];
         const due   = t.dueDate ? "Due: " + t.dueDate : "No due date";
         const added = "Added: " + new Date(t.createdAt).toLocaleDateString();
 
         const div = document.createElement("div");
+        div.className = "task-item";
         div.innerHTML =
           "<input type='checkbox' " + (t.completed ? "checked" : "") + " onchange='toggleDone(" + t.id + ")' />" +
-          " <strong>" + (t.completed ? "<s>" : "") + t.title + (t.completed ? "</s>" : "") + "</strong>" +
-          " [" + t.priority + "] | " + t.category +
-          "<br><small>" + due + " | " + added + "</small><br>" +
-          "<button onclick='openEdit(" + t.id + ")'>Edit</button> " +
-          "<button onclick='deleteTask(" + t.id + ")'>Delete</button><br><br>";
+          "<div class='task-body'>" +
+            "<div class='task-title " + (t.completed ? "done" : "") + "'>" + t.title + "</div>" +
+            "<div class='task-meta'>" +
+              "<span class='badge " + t.priority + "'>" + t.priority + "</span>" +
+              (t.category ? "<span>" + t.category + "</span>" : "") +
+              "<span>" + due + "</span>" +
+              "<span>" + added + "</span>" +
+            "</div>" +
+          "</div>" +
+          "<div class='task-actions'>" +
+            "<button class='btn-edit-sm' onclick='openEdit(" + t.id + ")'>Edit</button>" +
+            "<button class='btn-danger' onclick='deleteTask(" + t.id + ")'>Delete</button>" +
+          "</div>";
 
         list.appendChild(div);
       }
@@ -218,8 +531,9 @@
           for (let i = 0; i < data.length; i++) {
             const item = data[i];
             const li = document.createElement("li");
-            li.innerHTML = (item.completed ? "[done] " : "[not done] ") + item.title +
-              " — <button onclick='importTask(" + item.id + ")'>Add</button>";
+            li.innerHTML =
+              "<span>" + (item.completed ? "✓ " : "") + item.title + "</span>" +
+              "<button class='btn-import' onclick='importTask(" + item.id + ")'>Add</button>";
             li.dataset.id    = item.id;
             li.dataset.title = item.title;
             li.dataset.done  = item.completed;
@@ -245,11 +559,6 @@
       saveTasks();
       renderTasks();
     }
-
-    // keyboard event — press Enter to add a task
-    document.getElementById("input-title").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") addTask();
-    });
 
     // load tasks on page open
     renderTasks();
